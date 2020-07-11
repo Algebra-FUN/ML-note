@@ -1,8 +1,10 @@
-# Linear Model
+# Linear Regression with Multiple Variables
 
-## Linear Regression with Multiple Variables
+> ML Learning Note-1
+>
+> The basic of Linear Model
 
-### Overview
+## Overview
 
 | Section               | Name                          | Expression                                               |
 | --------------------- | ----------------------------- | -------------------------------------------------------- |
@@ -11,7 +13,7 @@
 | Optimization Method 1 | Batch Gradient Descent (BGD)  |                                                          |
 | Optimization Method 2 | Normal Equation (NE)          |                                                          |
 
-### Notation
+## Notation
 
 | Symbol        | Type                         | Representation                                        |
 | ------------- | ---------------------------- | ----------------------------------------------------- |
@@ -25,15 +27,15 @@
 | $$\theta$$    | $$\mathbb R^{n+1}$$          | the vector of weights of model                        |
 | $$X$$         | $$\mathbb R^{m\times(n+1)}$$ | the matrix of all input values of training samples    |
 
-### Model Representation
+## Model Representation
 
-#### Normal Formula
+### Normal Formula
 
 $$
 h(x)=\theta_0+\sum_{i=1}^n\theta_ix_i
 $$
 
-#### Matrix Formula
+### Matrix Formula
 
 $$
 h(x)=\theta_0+\sum_{i=1}^n\theta_ix_i\\
@@ -57,16 +59,16 @@ h(X)=
 =X\theta
 $$
 
-#### Geometrical Understanding
+### Geometrical Understanding
 
 1. $$h(x)=0$$ represent the (n-1)-dimension hyperplane in n-dimension space 
 2. $$y - h(x)$$ represent the  miss-distance of intercept between y and h(x)
 
-### Cost Function
+## Cost Function
 
 using `MSE` to measure the similarity of batch of output and target value.
 
-#### Normal Formula
+### Normal Formula
 
 $$
 J(\theta)=\frac1{2m}\sum_{j=1}^m(h(x^{(j)})-y^{(j)})
@@ -74,15 +76,15 @@ $$
 
 > where the $$\frac12$$ in J function aimed to cancel the 2 created by derivative.
 
-#### Matrix Formula
+### Matrix Formula
 
 $$
 J(\theta)=\frac1{2m}(X\theta-y)^T(X\theta-y)
 $$
 
-### Optimization Method
+## Optimization Method
 
-#### Optimization Task Representation
+### Optimization Task Representation
 
 | Key        | Item                                           |
 | ---------- | ---------------------------------------------- |
@@ -94,19 +96,23 @@ $$
 \min_\theta\frac1{2m}\sum_{j=1}^m(h(x^{(j)})-y^{(j)})
 $$
 
-#### Gradient Descent Algorithms
+### Gradient Descent Algorithms
 
-##### Normal Modality
+#### Normal Modality
+
+$$\alpha$$ here represent `learning rate`
 
 Repeat
+
 $$
 \theta_j:=\theta_j-\alpha\frac{\partial}{\partial\theta_j}J(\theta)\qquad  \forall j\in[1,...,n]\cap \mathbb N
 $$
 
 > simultaneously update for every j = 0,...,n
 
-##### Matrix Modality
+#### Matrix Modality
 where $$\frac{\partial}{\partial\theta}J(\theta)$$ represent:
+
 $$
 \frac{\partial}{\partial\theta}J(\theta)=
 \begin{bmatrix} 
@@ -116,7 +122,9 @@ $$
 \frac{\partial}{\partial\theta_n}J(\theta)
 \end{bmatrix}
 $$
+
 so the original formula can be represented as:
+
 $$
 \theta:=
 \begin{bmatrix} 
@@ -135,13 +143,14 @@ $$
 $$
 
 Repeat
+
 $$
 \theta:=\theta-\alpha\frac{\partial}{\partial\theta}J(\theta)
 $$
 
-##### Tips | Tricks | Techniques
+#### Tips | Tricks | Techniques
 
-###### Feature Scaling
+##### Feature Scaling
 
 As `Gradient Descent Algorithms` is sensitive to the scale of features which will affect the performance of the algorithms.
 
@@ -152,9 +161,114 @@ Idea: Make sure features are on a similar scale.
 In `sklearn`, you can use `StandScaler`:
 
 ```python
+from sklearn.preprocessing import StandardScaler
+from sklearn.datasets import load_boston
 
+X = load_boston().data  load features of dataset
+scaler = StandardScaler()  init scaler
+
+scaler.fit(X)  scaler fit features
+X = scaler.transfrom(X)  scaler transform features
+X = scaler.fit_transform(X)  fit and transform
 ```
 
+##### Inspect the algorithms working
+
+> plotting the figure of No. of iterations-$$ J(\theta)$$
+
+##### Learning Rate Selection
+
+* If $$\alpha$$ is too small: slow convergence :snail:
+* If $$\alpha$$ is too big: the cost function may not decrease on every iterations;may not converge :sweat:
+* so you need to choose a proper $$\alpha$$ in order to make it fast convergence
+
+### Normal Equation
+
+#### The formulas
+
+We can use the tool of `mathematical analysis` to solve this optimization problem.
+
+`Normal Equation`: Method to solve for $$\theta$$ **analytically**.
+
+As $$J(\theta)$$ is a convex function.
+
+So, the condition:
+
+$$
+\theta\space s.t.\frac{\partial}{\partial\theta}J(\theta)=0\Leftrightarrow \theta\space s.t.\min_\theta J(\theta)
+$$
+
+is `necessary and sufficient condition`
+
+As a result, you only need to solve the equation:
+
+$$
+\frac{\partial}{\partial\theta}J(\theta)=0
+$$
+
+$$
+\frac{\partial}{\partial\theta}J(\theta)=\frac{\partial}{\partial\theta}[\frac1{2m}(X\theta-y)^T(X\theta-y)]=0
+$$
+
+$$
+\frac{\partial}{\partial\theta}[(X\theta-y)^T(X\theta-y)]=0
+$$
+
+
+where attention to Partial Derivative formula
+
+$$
+\frac{\partial AX}{\partial X}=A^T
+$$
+
+$$
+\frac{\partial}{\partial\theta}[(X\theta-y)^T(X\theta-y)]=0\\
+\frac{\partial{(X\theta-y)}}{\partial\theta}\frac{\partial}{\partial{(X\theta-y)}}[(X\theta-y)^T(X\theta-y)]=0\\
+X^T(X\theta-y)=0\\
+\theta=(X^TX)^{-1}X^Ty
+$$
+
+#### Issue: non-invertible
+
+you see there is a matrix invert in the formula, but not all of the matrix has its own invert.
+
+when the matrix is singular or degenerate, the matrix can't be invert.
+
+so which $$X$$ will cause the matrix non-invertible?
+
+from linear algebra we learn that:
+
+$$
+\forall X\in \mathbb R^{m\times n},\quad\nexists {(X^TX)}^{-1}\Leftrightarrow rank(X) \neq \max_{M\in\mathbb R^{m\times n}}\{rank(M)\}
+$$
+
+> this condition equivalent to linearly dependent
+
+the common situation:
+
+* Too many features and too less samples: #features > #samples
+
+* Redundant features
+
+  $$
+  \begin{cases}
+  x_1=size\space in\space feet^2\\
+  x_2=size\space in\space m^2
+  \end{cases}
+  $$
+  
+#### Implement
+
+In `python`,you can use `numpy.linalg.pinv` to implement this:
+
+```python
+from numpy.linalg import pinv
+from numpy import matrix
+
+
+def norm_eq_method(X: matrix, y: vector) -> vector:
+    return pinv(X.T@X)@X.T@y
+```
 
 
 
